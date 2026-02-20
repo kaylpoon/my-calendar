@@ -1,0 +1,16 @@
+[
+    {
+        "name": "New York Meeting",
+        "date": "2026-03-10T09:00:00",
+        "timezone": "America/New_York"
+    },
+    {
+        "name": "London Call",
+        "date": "2026-04-15T14:00:00",
+        "timezone": "Europe/London"
+    },
+    {
+        "name": "Vacation",
+        "date": "2026-06-01T08:00:00"
+    }
+]
