@@ -1,22 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Calendar</title>
-    <link rel="stylesheet" href="">
+    <title>My Countdown Dashboard</title>
 </head>
 <body>
-    <script src="time.js"></script>
-    
-    <h1>Today is ...</h1>
-    <div class="countdown">
-        <h3>Event</h3>
-        <h5>Countdown</h5>
-        <h5>Countdown</h5>
-    </div>
+
+    <h1>Countdown Dashboard</h1>
+    <!-- PRIMARY LOCAL CLOCK -->
+    <h2>Local Time (<span id="localZone"></span>)</h2>
+    <div id="localTime"></div>
+
+    <hr>
+
+    <!-- SECONDARY TIME ZONE SELECTOR -->
+    <h2>Secondary Time Zone</h2>
+
+    <input
+        type="text"
+        id="timezoneSearch"
+        placeholder="Search time zone..."
+        style="width: 300px; margin-bottom: 5px;"
+    >
+
+    <select id="timezoneSelect" size="10" style="width: 320px;"></select>
+
+    <div id="secondaryTime"></div>
+
+    <hr>
+
+    <!-- COUNTDOWNS -->
+    <h2>Countdown Events</h2>
+    <div id="countdowns"></div>
+
+    <hr>
+
+    <!-- TIME ZONE CONVERSION TABLE -->
+    <h2>Time Zone Conversions</h2>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Time Zone</th>
+                <th>Current Time</th>
+                <th>Hour Difference</th>
+            </tr>
+        </thead>
+        <tbody id="timezoneTable"></tbody>
+    </table>
+
+    <script src="script.js"></script>
 </body>
 </html>
-
-
-
