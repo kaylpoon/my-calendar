@@ -1,0 +1,106 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+    color: #333;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background: #1e2a38;
+    color: white;
+}
+
+h1 {
+    margin: 0;
+}
+
+h3 {
+    margin-top: 5px;
+    font-weight: normal;
+}
+
+#eventsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 30px;
+}
+
+.event-tile {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.event-title {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.countdown {
+    font-size: 20px;
+    margin: 15px 0;
+    font-weight: bold;
+    color: #c0392b;
+}
+
+.live {
+    border-left: 6px solid #27ae60;
+}
+
+.upcoming {
+    border-left: 6px solid #2980b9;
+}
+
+.past {
+    border-left: 6px solid #7f8c8d;
+    opacity: 0.7;
+}
+
+#timeZoneSection {
+    padding: 30px;
+}
+
+.tz-search-box {
+    margin-bottom: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.tz-header {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.hidden {
+    display: none;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #2c3e50;
+    color: white;
+}
