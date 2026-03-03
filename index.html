@@ -1,53 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>My Countdown Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Countdown Dashboard</h1>
-    <!-- PRIMARY LOCAL CLOCK -->
-    <h2>Local Time (<span id="localZone"></span>)</h2>
-    <div id="localTime"></div>
+<header>
+    <h1 id="currentDateTime"></h1>
+    <h3 id="localZone"></h3>
+</header>
 
-    <hr>
+<main>
+    <section id="eventsContainer"></section>
 
-    <!-- SECONDARY TIME ZONE SELECTOR -->
-    <h2>Secondary Time Zone</h2>
+    <section id="timeZoneSection">
 
-    <input
-        type="text"
-        id="timezoneSearch"
-        placeholder="Search time zone..."
-        style="width: 300px; margin-bottom: 5px;"
-    >
+        <div class="tz-search-box">
+            <div class="tz-header" onclick="toggleDropdown()">
+                <span>Find a Time Zone</span>
+                <span id="caret">▼</span>
+            </div>
 
-    <select id="timezoneSelect" size="10" style="width: 320px;"></select>
+            <div id="dropdownContainer" class="hidden">
+                <input type="text" id="tzSearch" placeholder="Search time zone..." onkeyup="filterZones()">
+                <select id="tzSelect" size="8" onchange="displaySelectedZone()"></select>
+            </div>
 
-    <div id="secondaryTime"></div>
+            <div id="selectedZoneDisplay"></div>
+        </div>
 
-    <hr>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time Zone</th>
+                    <th>Current Time</th>
+                    <th>Hour Difference</th>
+                </tr>
+            </thead>
+            <tbody id="tzTableBody"></tbody>
+        </table>
 
-    <!-- COUNTDOWNS -->
-    <h2>Countdown Events</h2>
-    <div id="countdowns"></div>
+    </section>
+</main>
 
-    <hr>
-
-    <!-- TIME ZONE CONVERSION TABLE -->
-    <h2>Time Zone Conversions</h2>
-    <table border="1" cellpadding="6">
-        <thead>
-            <tr>
-                <th>Time Zone</th>
-                <th>Current Time</th>
-                <th>Hour Difference</th>
-            </tr>
-        </thead>
-        <tbody id="timezoneTable"></tbody>
-    </table>
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
