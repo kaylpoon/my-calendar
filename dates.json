@@ -1,16 +1,18 @@
 [
-    {
-        "name": "New York Meeting",
-        "date": "2026-03-10T09:00:00",
-        "timezone": "America/New_York"
-    },
-    {
-        "name": "London Call",
-        "date": "2026-04-15T14:00:00",
-        "timezone": "Europe/London"
-    },
-    {
-        "name": "Vacation",
-        "date": "2026-06-01T08:00:00"
-    }
+  {
+    "name": "Important Event Number 1",
+    "date": "2026-01-01",
+    "startTime": "00:00",
+    "endTime": "02:00",
+    "timeZone": "America/New_York",
+    "location": "https://maps.google.com"
+  },
+  {
+    "name": "Important Event Number 2",
+    "date": "2026-02-15",
+    "startTime": "12:00",
+    "endTime": "15:00",
+    "timeZone": "Europe/London",
+    "location": "https://maps.google.com"
+  }
 ]
