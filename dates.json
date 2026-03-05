@@ -1,18 +1,18 @@
 [
     {
-        "name": "Important Event Number 1",
-        "date": "2026-01-01",
-        "startTime": "00:00",
-        "endTime": "02:00",
-        "timeZone": "America/New_York",
-        "location": "https://maps.google.com"
+        "name": "Graduation",
+        "date": "2026-05-20",
+        "startTime": "16:00",
+        "endTime": "18:00",
+        "timeZone": "America/Chicago",
+        "location": "https://maps.app.goo.gl/5mQxTQDmZXPBMpAd6"
     },
     {
-        "name": "Important Event Number 2",
-        "date": "2026-02-15",
-        "startTime": "12:00",
-        "endTime": "15:00",
-        "timeZone": "Europe/London",
-        "location": "https://maps.google.com"
+        "name": "Dance Recital",
+        "date": "2026-05-25",
+        "startTime": "16:30",
+        "endTime": "18:30",
+        "timeZone": "America/Chicago",
+        "location": "https://maps.app.goo.gl/wHMY5ujSWdRDvgbEA"
     }
 ]
