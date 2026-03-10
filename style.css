@@ -1,127 +1,115 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #f4f6f9;
-    color: #333;
+body{
+    font-family:Arial, sans-serif;
+    margin:0;
+    background:#f4f6f9;
+    color:#333;
 }
 
 /* HEADER */
 
-header {
-    text-align: center;
-    padding: 20px;
-    background: #1e2a38;
-    color: white;
-}
-
-h1 {
-    margin: 0;
-}
-
-h3 {
-    margin-top: 5px;
-    font-weight: normal;
+header{
+    text-align:center;
+    padding:20px;
+    background:#1e2a38;
+    color:white;
 }
 
 /* EVENTS */
 
-#eventsContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 30px;
+#eventsContainer{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+    padding:30px;
 }
 
-.event-tile {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+.event-tile{
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    border:1px solid #ddd;
 }
 
-.event-title {
-    font-weight: bold;
-    font-size: 18px;
+.event-title{
+    font-weight:bold;
+    font-size:18px;
+    margin-bottom:10px;
 }
 
-.countdown {
-    font-size: 20px;
-    margin: 15px 0;
-    font-weight: bold;
-    color: #c0392b;
+.countdown{
+    font-weight:bold;
+    margin-bottom:10px;
 }
 
-.live { border-left: 6px solid #27ae60; }
-.upcoming { border-left: 6px solid #2980b9; }
-.past {
-    border-left: 6px solid #7f8c8d;
-    opacity: 0.7;
+/* TIMEZONE SECTION */
+
+#timeZoneSection{
+    padding:30px;
+    display:flex;
+    gap:30px;
+    align-items:flex-start;
 }
 
-/* TIME ZONE SECTION */
-
-#timeZoneSection {
-    padding: 30px;
-    display: flex;
-    gap: 30px;
-    align-items: flex-start;
+.tz-search-box{
+    flex:1;
+    background:white;
+    padding:15px;
+    border:1px solid #ddd;
+    border-radius:8px;
 }
 
-.tz-search-box {
-    flex: 1;
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-}
-
-#timeZoneSection table {
-    flex: 2;
-}
-
-.tz-header {
-    display: flex;
-    justify-content: space-between;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.hidden {
-    display: none;
-}
-
-input, select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 10px;
+#timeZoneSection table{
+    flex:2;
 }
 
 /* TABLE */
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
 }
 
-th {
-    background: #2c3e50;
-    color: white;
+th{
+    background:#2c3e50;
+    color:white;
 }
 
-/* RESPONSIVE */
+/* DROPDOWN */
 
-@media (max-width: 768px) {
-    #timeZoneSection {
-        flex-direction: column;
+.tz-header{
+    display:flex;
+    justify-content:space-between;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.hidden{
+    display:none;
+}
+
+input,select{
+    width:100%;
+    padding:8px;
+    margin-top:10px;
+}
+
+/* RESPONSIVE BY ORIENTATION */
+
+@media (orientation: portrait){
+    #timeZoneSection{
+        flex-direction:column;
+    }
+}
+
+@media (orientation: landscape){
+    #timeZoneSection{
+        flex-direction:row;
     }
 }
