@@ -2,13 +2,25 @@ const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let events = [];
 let timeZones = Intl.supportedValuesOf('timeZone').sort();
 
-/* HEADER (YYYY-MM-DD 24hr) */
+/* DATE FORMATTER */
+
+function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = date.toLocaleString("en-US", { month: "long" });
+    const year = date.getFullYear();
+
+    return `${day} ${month} ${year}`;
+}
+
+/* HEADER CLOCK */
+
 function updateHeader() {
     const now = new Date();
 
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
+
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
@@ -24,6 +36,7 @@ function updateHeader() {
 }
 
 /* LOAD EVENTS */
+
 function loadEvents() {
     fetch("dates.json")
         .then(res => res.json())
@@ -33,102 +46,106 @@ function loadEvents() {
         });
 }
 
-/* SORT + RENDER EVENTS */
+/* RENDER EVENTS */
+
 function renderEvents() {
+
     const container = document.getElementById("eventsContainer");
     container.innerHTML = "";
 
-    const now = new Date();
+    events.forEach((event, index) => {
 
-    const processedEvents = events.map(event => {
-        const start = new Date(`${event.date}T${event.startTime}`);
-        const end = new Date(`${event.date}T${event.endTime}`);
+        const start = new Date(event.start);
+        const end = new Date(event.end);
 
-        let status;
-        if (now >= start && now <= end) status = "live";
-        else if (now < start) status = "upcoming";
-        else status = "past";
+        const startDate = formatDate(start);
+        const endDate = formatDate(end);
 
-        return { ...event, start, end, status };
-    });
+        const startTime = start.toLocaleTimeString("en-GB", { hour12:false });
+        const endTime = end.toLocaleTimeString("en-GB", { hour12:false });
 
-    processedEvents.sort((a, b) => {
-        const order = { live: 0, upcoming: 1, past: 2 };
-        if (order[a.status] !== order[b.status])
-            return order[a.status] - order[b.status];
-
-        if (a.status === "upcoming") return a.start - b.start;
-        if (a.status === "past") return b.start - a.start;
-        return 0;
-    });
-
-    processedEvents.forEach(event => {
         const tile = document.createElement("div");
-        tile.className = `event-tile ${event.status}`;
+        tile.className = "event-tile";
+
+        let timezoneHTML = "";
+        if (event.timeZone && event.timeZone.trim() !== "") {
+            timezoneHTML = `<div>Time Zone: ${event.timeZone}</div>`;
+        }
+
+        let locationHTML = "";
+        if (event.locationName && event.locationLink) {
+            locationHTML =
+                `<div>Location: <a href="${event.locationLink}" target="_blank">${event.locationName}</a></div>`;
+        }
 
         tile.innerHTML = `
             <div class="event-title">${event.name}</div>
-            <div>${event.date}</div>
-            <div>Start Time: ${event.startTime} End Time: ${event.endTime}</div>
-            ${event.timeZone !== localZone ? `<div>Zone: ${event.timeZone}</div>` : ""}
-            <div><a href="${event.location}" target="_blank">Maps Location</a></div>
-            <div class="countdown" id="cd-${event.name}"></div>
+            <div class="countdown" id="cd-${index}"></div>
+            <div>Start: ${startDate} ${startTime}</div>
+            <div>End: ${endDate} ${endTime}</div>
+            ${timezoneHTML}
+            ${locationHTML}
         `;
 
         container.appendChild(tile);
+
     });
 }
 
 /* COUNTDOWN */
+
 function updateCountdowns() {
+
     const now = new Date();
 
-    events.forEach(event => {
-        const start = new Date(`${event.date}T${event.startTime}`);
-        const end = new Date(`${event.date}T${event.endTime}`);
-        const cdElement = document.getElementById(`cd-${event.name}`);
-        if (!cdElement) return;
+    events.forEach((event, index) => {
 
-        if (now >= start && now <= end) {
-            cdElement.innerText = "Event is LIVE";
-            return;
-        }
-
-        if (now > end) {
-            cdElement.innerText = "Event Ended";
-            return;
-        }
-
+        const start = new Date(event.start);
         const diff = start - now;
 
-        const d = Math.floor(diff / (1000*60*60*24));
-        const h = Math.floor((diff / (1000*60*60)) % 24);
-        const m = Math.floor((diff / (1000*60)) % 60);
-        const s = Math.floor((diff / 1000) % 60);
+        const cd = document.getElementById(`cd-${index}`);
+        if (!cd) return;
 
-        cdElement.innerText = `${d}d ${h}h ${m}m ${s}s`;
+        if (diff <= 0) {
+            cd.innerText = "Event started";
+            return;
+        }
+
+        const d = Math.floor(diff / (1000*60*60*24));
+        const h = Math.floor((diff/(1000*60*60))%24);
+        const m = Math.floor((diff/(1000*60))%60);
+        const s = Math.floor((diff/1000)%60);
+
+        cd.innerText = `${d}d ${h}h ${m}m ${s}s`;
     });
+
 }
 
 /* DROPDOWN */
+
 function populateDropdown() {
+
     const select = document.getElementById("tzSelect");
-    timeZones.forEach(zone => {
+
+    timeZones.forEach(zone=>{
         const option = document.createElement("option");
         option.value = zone;
         option.textContent = zone;
         select.appendChild(option);
     });
+
 }
 
 function filterZones() {
+
     const input = document.getElementById("tzSearch").value.toLowerCase();
     const select = document.getElementById("tzSelect");
 
-    Array.from(select.options).forEach(option => {
+    Array.from(select.options).forEach(option=>{
         option.style.display =
             option.value.toLowerCase().includes(input) ? "" : "none";
     });
+
 }
 
 function toggleDropdown() {
@@ -136,67 +153,69 @@ function toggleDropdown() {
 }
 
 function displaySelectedZone() {
+
     const zone = document.getElementById("tzSelect").value;
     const now = new Date();
 
     const time = now.toLocaleTimeString("en-GB", {
         timeZone: zone,
-        hour12: false
+        hour12:false
     });
 
     document.getElementById("selectedZoneDisplay").innerHTML =
         `Time Zone: ${zone}<br>Current Time: ${time}`;
 }
 
-/* TABLE (MAJOR CITIES ONLY) */
+/* TIMEZONE TABLE */
+
 function buildTable() {
+
     const tbody = document.getElementById("tzTableBody");
     tbody.innerHTML = "";
 
     const now = new Date();
 
     const majorZones = [
-        { city: "Los Angeles", zone: "America/Los_Angeles" },
-        { city: "Denver", zone: "America/Denver" },
-        { city: "Chicago", zone: "America/Chicago" },
-        { city: "New York", zone: "America/New_York" },
-        { city: "London", zone: "Europe/London" },
-        { city: "Paris", zone: "Europe/Paris" },
-        { city: "Dubai", zone: "Asia/Dubai" },
-        { city: "Mumbai", zone: "Asia/Kolkata" },
-        { city: "Tokyo", zone: "Asia/Tokyo" },
-        { city: "Sydney", zone: "Australia/Sydney" }
+        {city:"Los Angeles",zone:"America/Los_Angeles"},
+        {city:"Denver",zone:"America/Denver"},
+        {city:"Chicago",zone:"America/Chicago"},
+        {city:"New York",zone:"America/New_York"},
+        {city:"London",zone:"Europe/London"},
+        {city:"Paris",zone:"Europe/Paris"},
+        {city:"Dubai",zone:"Asia/Dubai"},
+        {city:"Mumbai",zone:"Asia/Kolkata"},
+        {city:"Tokyo",zone:"Asia/Tokyo"},
+        {city:"Sydney",zone:"Australia/Sydney"}
     ];
 
-    majorZones.forEach(entry => {
+    majorZones.forEach(entry=>{
+
         const zoneTime = new Date(
-            now.toLocaleString("en-US", { timeZone: entry.zone })
+            now.toLocaleString("en-US",{timeZone:entry.zone})
         );
 
-        const zoneOffset =
-            (zoneTime - now) / (1000 * 60 * 60);
-
-        const roundedDiff = Math.round(zoneOffset);
+        const diff = Math.round((zoneTime-now)/(1000*60*60));
 
         const row = document.createElement("tr");
 
         row.innerHTML = `
             <td>${entry.city} (${entry.zone})</td>
-            <td>${now.toLocaleTimeString("en-GB", { timeZone: entry.zone, hour12: false })}</td>
-            <td>${roundedDiff >= 0 ? "+" : ""}${roundedDiff}h</td>
+            <td>${now.toLocaleTimeString("en-GB",{timeZone:entry.zone,hour12:false})}</td>
+            <td>${diff>=0?"+":""}${diff}h</td>
         `;
 
         tbody.appendChild(row);
+
     });
+
 }
 
 /* INIT */
-setInterval(() => {
+
+setInterval(()=>{
     updateHeader();
     updateCountdowns();
-    buildTable();
-    renderEvents();
-}, 1000);
+},1000);
 
 updateHeader();
 loadEvents();
