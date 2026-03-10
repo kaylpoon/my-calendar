@@ -288,23 +288,82 @@ function updateSelectedZone(){
 
 function getTimeZoneName(zone){
 
-    const now = new Date();
+    const now = new Date()
 
-    const parts = new Intl.DateTimeFormat("en-US",{
-        timeZone:zone,
-        timeZoneName:"long"
-    }).formatToParts(now);
-
-    const full = parts.find(p=>p.type==="timeZoneName").value;
-
-    const abbrParts = new Intl.DateTimeFormat("en-US",{
+    const isDST = new Intl.DateTimeFormat("en-US",{
         timeZone:zone,
         timeZoneName:"short"
-    }).formatToParts(now);
+    }).formatToParts(now)
+      .find(p=>p.type==="timeZoneName").value
 
-    const abbr = abbrParts.find(p=>p.type==="timeZoneName").value;
+    const map = {
 
-    return `${full} (${abbr})`;
+        "America/Los_Angeles":{
+            PST:"Pacific Standard Time (PST)",
+            PDT:"Pacific Daylight Time (PDT)"
+        },
+
+        "America/Denver":{
+            MST:"Mountain Standard Time (MST)",
+            MDT:"Mountain Daylight Time (MDT)"
+        },
+
+        "America/Chicago":{
+            CST:"Central Standard Time (CST)",
+            CDT:"Central Daylight Time (CDT)"
+        },
+
+        "America/New_York":{
+            EST:"Eastern Standard Time (EST)",
+            EDT:"Eastern Daylight Time (EDT)"
+        },
+
+        "America/Sao_Paulo":{
+            default:"Brasília Standard Time (BRT)"
+        },
+
+        "Europe/London":{
+            GMT:"Greenwich Mean Time (GMT)",
+            BST:"British Summer Time (BST)"
+        },
+
+        "Europe/Paris":{
+            CET:"Central European Standard Time (CET)",
+            CEST:"Central European Summer Time (CEST)"
+        },
+
+        "Asia/Riyadh":{
+            default:"Arabian Standard Time (AST)"
+        },
+
+        "Asia/Kolkata":{
+            default:"India Standard Time (IST)"
+        },
+
+        "Asia/Shanghai":{
+            default:"China Standard Time (CST)"
+        },
+
+        "Asia/Tokyo":{
+            default:"Japan Standard Time (JST)"
+        },
+
+        "Australia/Sydney":{
+            AEST:"Australian Eastern Standard Time (AEST)",
+            AEDT:"Australian Eastern Daylight Time (AEDT)"
+        }
+
+    }
+
+    const zoneMap = map[zone]
+
+    if(!zoneMap) return ""
+
+    if(zoneMap.default) return zoneMap.default
+
+    if(zoneMap[isDST]) return zoneMap[isDST]
+
+    return Object.values(zoneMap)[0]
 }
 
 function buildTable(){
