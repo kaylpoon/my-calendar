@@ -58,7 +58,7 @@ function updateHeader(){
         `${date} ${h}:${m}:${s}`;
 
     document.getElementById("localZone").innerText =
-        `${getCityFromZone(localZone)} (${getUTCOffset(localZone)})`;
+        `Local Time Zone: ${getCityFromZone(localZone)} (${getUTCOffset(localZone)})`;
 }
 
 /* EVENT SORTING */
@@ -128,7 +128,7 @@ function renderEvents(){
 
         let timezoneHTML="";
         if(event.timeZone && event.timeZone.trim()!==""){
-            timezoneHTML=`<div>${getCityFromZone(event.timeZone)} (${getUTCOffset(event.timeZone)})</div>`;
+            timezoneHTML=`<div>Time Zone: ${getCityFromZone(event.timeZone)} (${getUTCOffset(event.timeZone)})</div>`;
         }
 
         let locationHTML="";
@@ -274,7 +274,7 @@ function updateSelectedZone(){
     const utc=getUTCOffset(selectedZone);
 
     document.getElementById("selectedZoneDisplay").innerHTML=
-    `${city} (${utc})<br>
+    `Time Zone: ${city} (${utc})<br>
     Current Time: ${time}<br>
     Conversion: ${conversion}`;
 
