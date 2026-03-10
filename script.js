@@ -1,382 +1,357 @@
-const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+let events=[]
+let selectedZone=null
+let localZone=Intl.DateTimeFormat().resolvedOptions().timeZone
+let tableZones=[]
 
-let events = [];
-let timeZones = Intl.supportedValuesOf("timeZone").sort();
-
-let tableZones = [];
-let selectedZone = null;
-
-/* DATE FORMAT */
+/* ---------------- DATE FORMATTING ---------------- */
 
 function formatDate(date){
-    const day = String(date.getDate()).padStart(2,"0");
-    const month = date.toLocaleString("en-US",{month:"long"});
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
+
+    const day=String(date.getDate()).padStart(2,"0")
+
+    const months=[
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
+    ]
+
+    const month=months[date.getMonth()]
+    const year=date.getFullYear()
+
+    return `${day} ${month} ${year}`
 }
 
-/* TIME FORMAT (NO SECONDS) */
-
-function formatTime(date){
-    const hours = String(date.getHours()).padStart(2,"0");
-    const minutes = String(date.getMinutes()).padStart(2,"0");
-    return `${hours}:${minutes}`;
-}
-
-/* CITY + UTC HELPERS */
+/* ---------------- CITY NAME ---------------- */
 
 function getCityFromZone(zone){
-    return zone.split("/").pop().replaceAll("_"," ");
+    return zone.split("/").pop().replaceAll("_"," ")
 }
+
+/* ---------------- UTC OFFSET ---------------- */
 
 function getUTCOffset(zone){
 
-    const now = new Date();
+    const now=new Date()
 
-    const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: zone,
-        timeZoneName: "shortOffset"
-    }).formatToParts(now);
+    const parts=new Intl.DateTimeFormat("en-US",{
+        timeZone:zone,
+        timeZoneName:"shortOffset"
+    }).formatToParts(now)
 
-    const tzPart = parts.find(p => p.type === "timeZoneName").value;
+    const tzPart=parts.find(p=>p.type==="timeZoneName").value
 
-    // tzPart looks like "GMT+9"
-    const offset = tzPart.replace("GMT","UTC");
-
-    return offset;
+    return tzPart.replace("GMT","UTC")
 }
 
-/* HEADER CLOCK */
+/* ---------------- TIMEZONE NAME ---------------- */
+
+function getTimeZoneName(zone){
+
+    const now=new Date()
+
+    const fullParts=new Intl.DateTimeFormat("en-US",{
+        timeZone:zone,
+        timeZoneName:"long"
+    }).formatToParts(now)
+
+    const full=fullParts.find(p=>p.type==="timeZoneName").value
+
+    const shortParts=new Intl.DateTimeFormat("en-US",{
+        timeZone:zone,
+        timeZoneName:"short"
+    }).formatToParts(now)
+
+    const abbr=shortParts.find(p=>p.type==="timeZoneName").value
+
+    return `${full} (${abbr})`
+}
+
+/* ---------------- HEADER CLOCK ---------------- */
 
 function updateHeader(){
 
-    const now = new Date();
+    const now=new Date()
 
-    const date = formatDate(now);
+    const date=formatDate(now)
 
-    const h = String(now.getHours()).padStart(2,"0");
-    const m = String(now.getMinutes()).padStart(2,"0");
-    const s = String(now.getSeconds()).padStart(2,"0");
+    const hours=String(now.getHours()).padStart(2,"0")
+    const minutes=String(now.getMinutes()).padStart(2,"0")
+    const seconds=String(now.getSeconds()).padStart(2,"0")
 
-    document.getElementById("currentDateTime").innerText =
-        `${date} ${h}:${m}:${s}`;
+    document.getElementById("currentDateTime").innerText=
+        `${date} ${hours}:${minutes}:${seconds}`
 
-    document.getElementById("localZone").innerText =
-        `Local Time Zone: ${getCityFromZone(localZone)} (${getUTCOffset(localZone)})`;
+    document.getElementById("localZone").innerText=
+        `Local Time Zone: ${getCityFromZone(localZone)} (${getUTCOffset(localZone)})`
 }
 
-/* EVENT SORTING */
+/* ---------------- EVENT SORTING ---------------- */
 
 function sortEvents(){
 
-    const now = new Date();
+    const now=new Date()
 
     events.sort((a,b)=>{
 
-        const aStart = new Date(a.start);
-        const aEnd = new Date(a.end);
+        const startA=new Date(a.start)
+        const startB=new Date(b.start)
 
-        const bStart = new Date(b.start);
-        const bEnd = new Date(b.end);
+        const endA=new Date(a.end)
+        const endB=new Date(b.end)
 
-        const aLive = now >= aStart && now <= aEnd;
-        const bLive = now >= bStart && now <= bEnd;
+        const pastA=endA<now
+        const pastB=endB<now
 
-        const aPast = now > aEnd;
-        const bPast = now > bEnd;
+        if(pastA&&!pastB) return 1
+        if(!pastA&&pastB) return -1
 
-        if(aLive && !bLive) return -1;
-        if(!aLive && bLive) return 1;
-
-        if(aPast && !bPast) return 1;
-        if(!aPast && bPast) return -1;
-
-        return aStart - bStart;
-    });
+        return startA-startB
+    })
 }
 
-/* LOAD EVENTS */
+/* ---------------- COUNTDOWN ---------------- */
 
-function loadEvents(){
+function getCountdown(start){
 
-    fetch("dates.json")
-    .then(res=>res.json())
-    .then(data=>{
-        events=data;
-        sortEvents();
-        renderEvents();
-    });
+    const now=new Date()
+    const startDate=new Date(start)
 
+    const diff=startDate-now
+
+    if(diff<=0) return "Started"
+
+    const totalSeconds=Math.floor(diff/1000)
+
+    const days=Math.floor(totalSeconds/86400)
+    const minutes=Math.floor((totalSeconds%3600)/60)
+    const seconds=totalSeconds%60
+
+    return `${days}d ${minutes}m ${seconds}s`
 }
 
-/* RENDER EVENTS */
+/* ---------------- EVENT TILES ---------------- */
 
 function renderEvents(){
 
-    const container=document.getElementById("eventsContainer");
-    container.innerHTML="";
+    const container=document.getElementById("eventsContainer")
+    container.innerHTML=""
 
-    events.forEach((event,index)=>{
+    const now=new Date()
 
-        const start=new Date(event.start);
-        const end=new Date(event.end);
+    events.forEach(event=>{
 
-        const startDate=formatDate(start);
-        const endDate=formatDate(end);
+        const start=new Date(event.start)
+        const end=new Date(event.end)
 
-        const startTime=formatTime(start);
-        const endTime=formatTime(end);
+        const tile=document.createElement("div")
+        tile.className="eventTile"
 
-        const tile=document.createElement("div");
-        tile.className="event-tile";
+        const countdown=end<now?"Ended":getCountdown(event.start)
 
-        let timezoneHTML="";
-        if(event.timeZone && event.timeZone.trim()!==""){
-            timezoneHTML=`<div>Time Zone: ${getCityFromZone(event.timeZone)} (${getUTCOffset(event.timeZone)})</div>`;
+        let dateHTML=""
+
+        const sameDate=start.toDateString()===end.toDateString()
+
+        if(sameDate){
+
+            dateHTML=`<div>Date: ${formatDate(start)}</div>
+            <div>Start: ${start.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</div>
+            <div>End: ${end.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</div>`
+
+        }else{
+
+            dateHTML=`
+            <div>Start: ${formatDate(start)} | ${start.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</div>
+            <div>End: ${formatDate(end)} | ${end.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</div>
+            `
         }
 
-        let locationHTML="";
-        if(event.locationName && event.locationLink){
-            locationHTML=`<div>Location: <a href="${event.locationLink}" target="_blank">${event.locationName}</a></div>`;
+        let timezoneHTML=""
+        if(event.timeZone){
+            timezoneHTML=`<div>Time Zone: ${getCityFromZone(event.timeZone)} (${getUTCOffset(event.timeZone)})</div>`
         }
 
-        let dateSection="";
-        let startEndSection="";
-
-        if(startDate===endDate){
-
-            dateSection=`<div>Date: ${startDate}</div>`;
-
-            startEndSection=`
-            <div>Start: ${startTime}</div>
-            <div>End: ${endTime}</div>
-            `;
-
-        } else {
-
-            startEndSection=`
-            <div>Start: ${startDate} | ${startTime}</div>
-            <div>End: ${endDate} | ${endTime}</div>
-            `;
-
+        let locationHTML=""
+        if(event.locationName && event.mapLink){
+            locationHTML=`<div>Location: <a href="${event.mapLink}" target="_blank">${event.locationName}</a></div>`
         }
 
         tile.innerHTML=`
-        <div class="event-title">${event.name}</div>
-        <div class="countdown" id="cd-${index}"></div>
-        ${dateSection}
-        ${startEndSection}
+        <h3>${event.name}</h3>
+        <div>${countdown}</div>
+        ${dateHTML}
         ${timezoneHTML}
         ${locationHTML}
-        `;
+        `
 
-        container.appendChild(tile);
-
-    });
-
+        container.appendChild(tile)
+    })
 }
 
-/* COUNTDOWN */
+/* ---------------- LOAD EVENTS ---------------- */
 
-function updateCountdowns(){
+async function loadEvents(){
 
-    const now=new Date();
+    const response=await fetch("dates.json")
+    events=await response.json()
 
-    events.forEach((event,index)=>{
-
-        const start=new Date(event.start);
-        const end=new Date(event.end);
-
-        const cd=document.getElementById(`cd-${index}`);
-        if(!cd) return;
-
-        if(now>=start && now<=end){
-            cd.innerText="Event live";
-            return;
-        }
-
-        if(now>end){
-            cd.innerText="Event ended";
-            return;
-        }
-
-        const diff=start-now;
-
-        const d=Math.floor(diff/(1000*60*60*24));
-        const h=Math.floor((diff/(1000*60*60))%24);
-        const m=Math.floor((diff/(1000*60))%60);
-        const s=Math.floor((diff/1000)%60);
-
-        cd.innerText=`${d}d ${h}h ${m}m ${s}s`;
-
-    });
-
+    sortEvents()
+    renderEvents()
 }
 
-/* DROPDOWN */
-
-function populateDropdown(){
-
-    const select=document.getElementById("tzSelect");
-
-    timeZones.forEach(zone=>{
-        const option=document.createElement("option");
-        option.value=zone;
-        option.textContent=zone;
-        select.appendChild(option);
-    });
-
-}
-
-function filterZones(){
-
-    const input=document.getElementById("tzSearch").value.toLowerCase();
-    const select=document.getElementById("tzSelect");
-
-    Array.from(select.options).forEach(option=>{
-        option.style.display=
-        option.value.toLowerCase().includes(input)?"":"none";
-    });
-
-}
-
-function toggleDropdown(){
-    document.getElementById("dropdownContainer").classList.toggle("hidden");
-}
-
-/* SELECTED TIMEZONE */
-
-function displaySelectedZone(){
-
-    const zone=document.getElementById("tzSelect").value;
-    selectedZone=zone;
-
-    updateSelectedZone();
-
-}
+/* ---------------- SEARCH ZONE ---------------- */
 
 function updateSelectedZone(){
 
-    if(!selectedZone) return;
+    if(!selectedZone) return
 
-    const now=new Date();
+    const now=new Date()
 
     const time=now.toLocaleTimeString("en-GB",{
         timeZone:selectedZone,
         hour12:false
-    });
+    })
 
     const zoneTime=new Date(
         now.toLocaleString("en-US",{timeZone:selectedZone})
-    );
+    )
 
-    const diff=Math.round((zoneTime-now)/(1000*60*60));
+    const diffMs=zoneTime-now
+    const diffMinutes=Math.round(diffMs/(1000*60))
 
-    const conversion=`${diff>=0?"+":""}${diff}h`;
+    const hours=Math.trunc(diffMinutes/60)
+    const minutes=Math.abs(diffMinutes%60)
 
-    const city=getCityFromZone(selectedZone);
-    const utc=getUTCOffset(selectedZone);
+    let conversion=`${hours>=0?"+":""}${hours}h`
+    if(minutes!==0) conversion+=` ${minutes}m`
+
+    const city=getCityFromZone(selectedZone)
+    const utc=getUTCOffset(selectedZone)
 
     document.getElementById("selectedZoneDisplay").innerHTML=
     `Time Zone: ${city} (${utc})<br>
     Current Time: ${time}<br>
-    Conversion: ${conversion}`;
-
+    Conversion: ${conversion}`
 }
 
-/* TIMEZONE TABLE */
+/* ---------------- TABLE BUILD ---------------- */
 
 function buildTable(){
 
-    const tbody=document.getElementById("tzTableBody");
-    tbody.innerHTML="";
+    const tbody=document.getElementById("tzTableBody")
+    tbody.innerHTML=""
 
     const majorZones=[
+
         {city:"Los Angeles",zone:"America/Los_Angeles"},
         {city:"Denver",zone:"America/Denver"},
-        {city:"Chicago",zone:"America/Chicago"},
+        {city:"Chicago / Dallas",zone:"America/Chicago"},
         {city:"New York",zone:"America/New_York"},
+        {city:"São Paulo / Buenos Aires",zone:"America/Sao_Paulo"},
         {city:"London",zone:"Europe/London"},
-        {city:"Paris",zone:"Europe/Paris"},
-        {city:"Dubai",zone:"Asia/Dubai"},
-        {city:"Mumbai",zone:"Asia/Kolkata"},
+        {city:"Paris / Berlin",zone:"Europe/Paris"},
+        {city:"Riyadh / Moscow",zone:"Asia/Riyadh"},
+        {city:"Delhi",zone:"Asia/Kolkata"},
+        {city:"Beijing / Singapore",zone:"Asia/Shanghai"},
         {city:"Tokyo",zone:"Asia/Tokyo"},
         {city:"Sydney",zone:"Australia/Sydney"}
-    ];
 
-    tableZones=majorZones;
+    ]
+
+    tableZones=majorZones
 
     majorZones.forEach((entry,index)=>{
 
-        const row=document.createElement("tr");
+        const row=document.createElement("tr")
 
         row.innerHTML=`
         <td>${entry.city} (${getUTCOffset(entry.zone)})</td>
+        <td>${getTimeZoneName(entry.zone)}</td>
         <td id="tz-time-${index}"></td>
         <td id="tz-diff-${index}"></td>
-        `;
+        `
 
-        tbody.appendChild(row);
-
-    });
-
+        tbody.appendChild(row)
+    })
 }
 
-/* UPDATE TABLE TIMES */
+/* ---------------- TABLE LIVE UPDATE ---------------- */
 
 function updateTableTimes(){
 
-    const now=new Date();
+    const now=new Date()
 
     tableZones.forEach((entry,index)=>{
+
+        const zoneTime=new Date(
+            now.toLocaleString("en-US",{timeZone:entry.zone})
+        )
+
+        const diffMs=zoneTime-now
+        const diffMinutes=Math.round(diffMs/(1000*60))
+
+        const hours=Math.trunc(diffMinutes/60)
+        const minutes=Math.abs(diffMinutes%60)
+
+        let conversion=`${hours>=0?"+":""}${hours}h`
+        if(minutes!==0) conversion+=` ${minutes}m`
 
         const time=now.toLocaleTimeString("en-GB",{
             timeZone:entry.zone,
             hour12:false
-        });
+        })
 
-        const zoneTime=new Date(
-            now.toLocaleString("en-US",{timeZone:entry.zone})
-        );
+        const cell=document.getElementById(`tz-time-${index}`)
+        const diffCell=document.getElementById(`tz-diff-${index}`)
 
-        const diff=Math.round((zoneTime-now)/(1000*60*60));
+        if(cell) cell.innerText=time
+        if(diffCell) diffCell.innerText=conversion
 
-        const cell=document.getElementById(`tz-time-${index}`);
-        const diffCell=document.getElementById(`tz-diff-${index}`);
-
-        if(cell) cell.innerText=time;
-        if(diffCell) diffCell.innerText=`${diff>=0?"+":""}${diff}h`;
-
-    });
-
+    })
 }
 
-/* RESORT EVENTS */
+/* ---------------- TIMEZONE DROPDOWN ---------------- */
 
-function resortEvents(){
+function populateTimeZones(){
 
-    sortEvents();
-    renderEvents();
+    const select=document.getElementById("timezoneSelect")
 
+    const zones=Intl.supportedValuesOf("timeZone").sort()
+
+    zones.forEach(zone=>{
+
+        const option=document.createElement("option")
+        option.value=zone
+        option.textContent=zone
+
+        select.appendChild(option)
+    })
+
+    select.addEventListener("change",()=>{
+        selectedZone=select.value
+        updateSelectedZone()
+    })
 }
 
-/* GLOBAL CLOCK */
+/* ---------------- INITIALIZE ---------------- */
 
-setInterval(()=>{
+function init(){
 
-    updateHeader();
-    updateCountdowns();
-    updateSelectedZone();
-    updateTableTimes();
+    updateHeader()
+    loadEvents()
 
-},1000);
+    buildTable()
+    populateTimeZones()
 
-setInterval(resortEvents,60000);
+    setInterval(()=>{
+        updateHeader()
+        updateTableTimes()
+        updateSelectedZone()
+        renderEvents()
+    },1000)
 
-/* INIT */
+    setInterval(()=>{
+        sortEvents()
+    },60000)
+}
 
-updateHeader();
-loadEvents();
-populateDropdown();
-buildTable();
-updateTableTimes();
+document.addEventListener("DOMContentLoaded",init)
