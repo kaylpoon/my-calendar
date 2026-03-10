@@ -1,82 +1,82 @@
 [
     {
         "name": "Graduation",
-        "date": "2026-05-20",
-        "startTime": "16:00",
-        "endTime": "18:00",
-        "timeZone": "America/Chicago",
-        "location": "https://maps.app.goo.gl/5mQxTQDmZXPBMpAd6"
+        "start": "2026-05-20T16:00:00",
+        "end": "2026-05-20T18:00:00",
+        "timeZone": "",
+        "locationName": "Comerica Center",
+        "locationLink": "https://maps.app.goo.gl/5mQxTQDmZXPBMpAd6"
     },
     {
         "name": "Dance Recital",
-        "date": "2026-05-25",
-        "startTime": "16:30",
-        "endTime": "18:30",
-        "timeZone": "America/Chicago",
-        "location": "https://maps.app.goo.gl/wHMY5ujSWdRDvgbEA"
+        "start": "2026-05-25T16:30:00",
+        "end": "2026-05-25T18:30:00",
+        "timeZone": "",
+        "locationName": "Courtyard Theater",
+        "locationLink": "https://maps.app.goo.gl/wHMY5ujSWdRDvgbEA"
     },
     {
         "name": "蕾蕾 Wedding",
-        "date": "2026-03-14",
-        "startTime": "16:30",
-        "endTime": "18:30",
+        "start": "2026-03-14T16:30:00",
+        "end": "2026-03-14T18:30:00",
         "timeZone": "America/Los_Angeles",
-        "location": "https://maps.app.goo.gl/98Q4EAn7TBi7JLkP6"
+        "locationName": "Twin Oaks Golf Course, San Marcos, CA",
+        "locationLink": "https://maps.app.goo.gl/98Q4EAn7TBi7JLkP6"
     },
     {
         "name": "AP Microeconomics",
-        "date": "2026-05-04",
-        "startTime": "12:00",
-        "endTime": "15:00",
+        "start": "2026-05-04T12:00:00",
+        "end": "2026-05-04T15:00:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     },
     {
         "name": "AP US Government",
-        "date": "2026-05-05",
-        "startTime": "12:00",
-        "endTime": "15:30",
+        "start": "2026-05-05T12:00:00",
+        "end": "2026-05-05T15:30:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     },
     {
         "name": "AP English Literature",
-        "date": "2026-05-06",
-        "startTime": "08:00",
-        "endTime": "11:30",
+        "start": "2026-05-06T08:00:00",
+        "end": "2026-05-06T11:30:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     },
     {
         "name": "AP Macroeconomics",
-        "date": "2026-05-08",
-        "startTime": "12:00",
-        "endTime": "15:00",
+        "start": "2026-05-08T12:00:00",
+        "end": "2026-05-08T15:00:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     },
     {
         "name": "AP Calculus BC",
-        "date": "2026-05-11",
-        "startTime": "08:00",
-        "endTime": "12:00",
+        "start": "2026-05-11T08:00:00",
+        "end": "2026-05-11T12:00:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     },
     {
         "name": "AP Physics C: Mechanics",
-        "date": "2026-05-13",
-        "startTime": "12:00",
-        "endTime": "15:30",
+        "start": "2026-05-13T12:00:00",
+        "end": "2026-05-13T15:30:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     },
     {
         "name": "AP Physics C: E & M",
-        "date": "2026-05-14",
-        "startTime": "12:00",
-        "endTime": "15:30",
+        "start": "2026-05-14T12:00:00",
+        "end": "2026-05-14T15:30:00",
         "timeZone": "",
-        "location": ""
+        "locationName": "",
+        "locationLink": ""
     }
 ]
