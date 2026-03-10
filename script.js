@@ -1,4 +1,5 @@
 const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 let events = [];
 let timeZones = Intl.supportedValuesOf("timeZone").sort();
 
@@ -7,141 +8,202 @@ let selectedZone = null;
 
 /* DATE FORMAT */
 
-function formatDate(date) {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = date.toLocaleString("en-US", { month: "long" });
+function formatDate(date){
+    const day = String(date.getDate()).padStart(2,"0");
+    const month = date.toLocaleString("en-US",{month:"long"});
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
 }
 
-/* HEADER CLOCK */
+/* TIME FORMAT (NO SECONDS) */
 
-function updateHeader() {
+function formatTime(date){
+    const hours = String(date.getHours()).padStart(2,"0");
+    const minutes = String(date.getMinutes()).padStart(2,"0");
+    return `${hours}:${minutes}`;
+}
+
+/* CITY + UTC HELPERS */
+
+function getCityFromZone(zone){
+    return zone.split("/").pop().replaceAll("_"," ");
+}
+
+function getUTCOffset(zone){
+
     const now = new Date();
 
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
+    const zoneTime = new Date(
+        now.toLocaleString("en-US",{timeZone:zone})
+    );
 
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const diff = Math.round((zoneTime-now)/(1000*60*60));
+
+    return `UTC${diff>=0?"+":""}${diff}`;
+}
+
+/* HEADER CLOCK */
+
+function updateHeader(){
+
+    const now = new Date();
+
+    const date = formatDate(now);
+
+    const h = String(now.getHours()).padStart(2,"0");
+    const m = String(now.getMinutes()).padStart(2,"0");
+    const s = String(now.getSeconds()).padStart(2,"0");
 
     document.getElementById("currentDateTime").innerText =
-        `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
-    const offset = -now.getTimezoneOffset() / 60;
-    const sign = offset >= 0 ? "+" : "-";
+        `${date} ${h}:${m}:${s}`;
 
     document.getElementById("localZone").innerText =
-        `Local Time Zone: ${localZone} (UTC ${sign}${Math.abs(offset)})`;
+        `${getCityFromZone(localZone)} (${getUTCOffset(localZone)})`;
+}
+
+/* EVENT SORTING */
+
+function sortEvents(){
+
+    const now = new Date();
+
+    events.sort((a,b)=>{
+
+        const aStart = new Date(a.start);
+        const aEnd = new Date(a.end);
+
+        const bStart = new Date(b.start);
+        const bEnd = new Date(b.end);
+
+        const aLive = now >= aStart && now <= aEnd;
+        const bLive = now >= bStart && now <= bEnd;
+
+        const aPast = now > aEnd;
+        const bPast = now > bEnd;
+
+        if(aLive && !bLive) return -1;
+        if(!aLive && bLive) return 1;
+
+        if(aPast && !bPast) return 1;
+        if(!aPast && bPast) return -1;
+
+        return aStart - bStart;
+    });
 }
 
 /* LOAD EVENTS */
 
-function loadEvents() {
+function loadEvents(){
+
     fetch("dates.json")
-        .then(res => res.json())
-        .then(data => {
-            events = data;
-            renderEvents();
-        });
+    .then(res=>res.json())
+    .then(data=>{
+        events=data;
+        sortEvents();
+        renderEvents();
+    });
+
 }
 
 /* RENDER EVENTS */
 
-function renderEvents() {
+function renderEvents(){
 
-    const container = document.getElementById("eventsContainer");
-    container.innerHTML = "";
+    const container=document.getElementById("eventsContainer");
+    container.innerHTML="";
 
-    events.forEach((event, index) => {
+    events.forEach((event,index)=>{
 
-        const start = new Date(event.start);
-        const end = new Date(event.end);
+        const start=new Date(event.start);
+        const end=new Date(event.end);
 
-        const startDate = formatDate(start);
-        const endDate = formatDate(end);
+        const startDate=formatDate(start);
+        const endDate=formatDate(end);
 
-        const startTime = start.toLocaleTimeString("en-GB",{hour12:false});
-        const endTime = end.toLocaleTimeString("en-GB",{hour12:false});
+        const startTime=formatTime(start);
+        const endTime=formatTime(end);
 
-        const tile = document.createElement("div");
-        tile.className = "event-tile";
+        const tile=document.createElement("div");
+        tile.className="event-tile";
 
-        let timezoneHTML = "";
-        if (event.timeZone && event.timeZone.trim() !== "") {
-            timezoneHTML = `<div>Time Zone: ${event.timeZone}</div>`;
+        let timezoneHTML="";
+        if(event.timeZone && event.timeZone.trim()!==""){
+            timezoneHTML=`<div>${getCityFromZone(event.timeZone)} (${getUTCOffset(event.timeZone)})</div>`;
         }
 
-        let locationHTML = "";
-        if (event.locationName && event.locationLink) {
-            locationHTML =
-                `<div>Location: <a href="${event.locationLink}" target="_blank">${event.locationName}</a></div>`;
+        let locationHTML="";
+        if(event.locationName && event.locationLink){
+            locationHTML=`<div>Location: <a href="${event.locationLink}" target="_blank">${event.locationName}</a></div>`;
         }
 
-        /* NEW DATE FORMAT LOGIC */
+        let dateSection="";
+        let startEndSection="";
 
-        let dateSection = "";
-        let startEndSection = "";
+        if(startDate===endDate){
 
-        if(startDate === endDate){
+            dateSection=`<div>Date: ${startDate}</div>`;
 
-            dateSection = `<div>Date: ${startDate}</div>`;
-
-            startEndSection = `
-                <div>Start: ${startTime}</div>
-                <div>End: ${endTime}</div>
+            startEndSection=`
+            <div>Start: ${startTime}</div>
+            <div>End: ${endTime}</div>
             `;
 
         } else {
 
-            startEndSection = `
-                <div>Start: ${startDate} ${startTime}</div>
-                <div>End: ${endDate} ${endTime}</div>
+            startEndSection=`
+            <div>Start: ${startDate} | ${startTime}</div>
+            <div>End: ${endDate} | ${endTime}</div>
             `;
 
         }
 
-        tile.innerHTML = `
-            <div class="event-title">${event.name}</div>
-            <div class="countdown" id="cd-${index}"></div>
-            ${dateSection}
-            ${startEndSection}
-            ${timezoneHTML}
-            ${locationHTML}
+        tile.innerHTML=`
+        <div class="event-title">${event.name}</div>
+        <div class="countdown" id="cd-${index}"></div>
+        ${dateSection}
+        ${startEndSection}
+        ${timezoneHTML}
+        ${locationHTML}
         `;
 
         container.appendChild(tile);
 
     });
+
 }
 
 /* COUNTDOWN */
 
-function updateCountdowns() {
+function updateCountdowns(){
 
-    const now = new Date();
+    const now=new Date();
 
     events.forEach((event,index)=>{
 
-        const start = new Date(event.start);
-        const diff = start - now;
+        const start=new Date(event.start);
+        const end=new Date(event.end);
 
-        const cd = document.getElementById(`cd-${index}`);
+        const cd=document.getElementById(`cd-${index}`);
         if(!cd) return;
 
-        if(diff <= 0){
-            cd.innerText = "Event started";
+        if(now>=start && now<=end){
+            cd.innerText="Event live";
             return;
         }
 
-        const d = Math.floor(diff/(1000*60*60*24));
-        const h = Math.floor((diff/(1000*60*60))%24);
-        const m = Math.floor((diff/(1000*60))%60);
-        const s = Math.floor((diff/1000)%60);
+        if(now>end){
+            cd.innerText="Event ended";
+            return;
+        }
 
-        cd.innerText = `${d}d ${h}h ${m}m ${s}s`;
+        const diff=start-now;
+
+        const d=Math.floor(diff/(1000*60*60*24));
+        const h=Math.floor((diff/(1000*60*60))%24);
+        const m=Math.floor((diff/(1000*60))%60);
+        const s=Math.floor((diff/1000)%60);
+
+        cd.innerText=`${d}d ${h}h ${m}m ${s}s`;
 
     });
 
@@ -149,39 +211,42 @@ function updateCountdowns() {
 
 /* DROPDOWN */
 
-function populateDropdown() {
+function populateDropdown(){
 
-    const select = document.getElementById("tzSelect");
+    const select=document.getElementById("tzSelect");
 
     timeZones.forEach(zone=>{
-        const option = document.createElement("option");
-        option.value = zone;
-        option.textContent = zone;
+        const option=document.createElement("option");
+        option.value=zone;
+        option.textContent=zone;
         select.appendChild(option);
     });
 
 }
 
-function filterZones() {
+function filterZones(){
 
-    const input = document.getElementById("tzSearch").value.toLowerCase();
-    const select = document.getElementById("tzSelect");
+    const input=document.getElementById("tzSearch").value.toLowerCase();
+    const select=document.getElementById("tzSelect");
 
     Array.from(select.options).forEach(option=>{
-        option.style.display =
-            option.value.toLowerCase().includes(input) ? "" : "none";
+        option.style.display=
+        option.value.toLowerCase().includes(input)?"":"none";
     });
 
 }
 
-function toggleDropdown() {
+function toggleDropdown(){
     document.getElementById("dropdownContainer").classList.toggle("hidden");
 }
 
-function displaySelectedZone() {
+/* SELECTED TIMEZONE */
 
-    const zone = document.getElementById("tzSelect").value;
-    selectedZone = zone;
+function displaySelectedZone(){
+
+    const zone=document.getElementById("tzSelect").value;
+    selectedZone=zone;
+
     updateSelectedZone();
 
 }
@@ -190,35 +255,39 @@ function updateSelectedZone(){
 
     if(!selectedZone) return;
 
-    const now = new Date();
+    const now=new Date();
 
-    const time = now.toLocaleTimeString("en-GB",{
+    const time=now.toLocaleTimeString("en-GB",{
         timeZone:selectedZone,
         hour12:false
     });
 
-    const zoneTime = new Date(
+    const zoneTime=new Date(
         now.toLocaleString("en-US",{timeZone:selectedZone})
     );
 
-    const diff = Math.round((zoneTime-now)/(1000*60*60));
+    const diff=Math.round((zoneTime-now)/(1000*60*60));
 
-    const conversion = `${diff>=0?"+":""}${diff}h`;
+    const conversion=`${diff>=0?"+":""}${diff}h`;
 
-    document.getElementById("selectedZoneDisplay").innerHTML =
-        `Time Zone: ${selectedZone}<br>
-         Current Time: ${time}<br>
-         Conversion: ${conversion}`;
+    const city=getCityFromZone(selectedZone);
+    const utc=getUTCOffset(selectedZone);
+
+    document.getElementById("selectedZoneDisplay").innerHTML=
+    `${city} (${utc})<br>
+    Current Time: ${time}<br>
+    Conversion: ${conversion}`;
+
 }
 
 /* TIMEZONE TABLE */
 
 function buildTable(){
 
-    const tbody = document.getElementById("tzTableBody");
-    tbody.innerHTML = "";
+    const tbody=document.getElementById("tzTableBody");
+    tbody.innerHTML="";
 
-    const majorZones = [
+    const majorZones=[
         {city:"Los Angeles",zone:"America/Los_Angeles"},
         {city:"Denver",zone:"America/Denver"},
         {city:"Chicago",zone:"America/Chicago"},
@@ -231,24 +300,16 @@ function buildTable(){
         {city:"Sydney",zone:"Australia/Sydney"}
     ];
 
-    tableZones = majorZones;
-
-    const now = new Date();
+    tableZones=majorZones;
 
     majorZones.forEach((entry,index)=>{
 
-        const zoneTime = new Date(
-            now.toLocaleString("en-US",{timeZone:entry.zone})
-        );
+        const row=document.createElement("tr");
 
-        const diff = Math.round((zoneTime-now)/(1000*60*60));
-
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${entry.city} (${entry.zone})</td>
-            <td id="tz-time-${index}"></td>
-            <td>${diff>=0?"+":""}${diff}h</td>
+        row.innerHTML=`
+        <td>${entry.city} (${getUTCOffset(entry.zone)})</td>
+        <td id="tz-time-${index}"></td>
+        <td id="tz-diff-${index}"></td>
         `;
 
         tbody.appendChild(row);
@@ -261,23 +322,41 @@ function buildTable(){
 
 function updateTableTimes(){
 
-    const now = new Date();
+    const now=new Date();
 
     tableZones.forEach((entry,index)=>{
 
-        const time = now.toLocaleTimeString("en-GB",{
+        const time=now.toLocaleTimeString("en-GB",{
             timeZone:entry.zone,
             hour12:false
         });
 
-        const cell = document.getElementById(`tz-time-${index}`);
-        if(cell) cell.innerText = time;
+        const zoneTime=new Date(
+            now.toLocaleString("en-US",{timeZone:entry.zone})
+        );
+
+        const diff=Math.round((zoneTime-now)/(1000*60*60));
+
+        const cell=document.getElementById(`tz-time-${index}`);
+        const diffCell=document.getElementById(`tz-diff-${index}`);
+
+        if(cell) cell.innerText=time;
+        if(diffCell) diffCell.innerText=`${diff>=0?"+":""}${diff}h`;
 
     });
 
 }
 
-/* GLOBAL CLOCK LOOP */
+/* RESORT EVENTS */
+
+function resortEvents(){
+
+    sortEvents();
+    renderEvents();
+
+}
+
+/* GLOBAL CLOCK */
 
 setInterval(()=>{
 
@@ -287,6 +366,8 @@ setInterval(()=>{
     updateTableTimes();
 
 },1000);
+
+setInterval(resortEvents,60000);
 
 /* INIT */
 
