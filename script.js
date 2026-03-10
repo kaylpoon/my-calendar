@@ -33,13 +33,17 @@ function getUTCOffset(zone){
 
     const now = new Date();
 
-    const zoneTime = new Date(
-        now.toLocaleString("en-US",{timeZone:zone})
-    );
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: zone,
+        timeZoneName: "shortOffset"
+    }).formatToParts(now);
 
-    const diff = Math.round((zoneTime-now)/(1000*60*60));
+    const tzPart = parts.find(p => p.type === "timeZoneName").value;
 
-    return `UTC${diff>=0?"+":""}${diff}`;
+    // tzPart looks like "GMT+9"
+    const offset = tzPart.replace("GMT","UTC");
+
+    return offset;
 }
 
 /* HEADER CLOCK */
